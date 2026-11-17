@@ -1,0 +1,1 @@
+El proyecto centraliza la gestión de clientes, empeños, inventario y ventas de una joyería, automatizando cálculos y facilitando el seguimiento de contratos y precios del oro.
