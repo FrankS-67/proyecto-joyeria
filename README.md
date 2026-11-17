@@ -1,88 +1,82 @@
 # Joyería y Compraventa
 
-Aplicación web académica de gestión de inventario, ventas y empeños, construida
-con Django y plantillas renderizadas en el servidor.
+Aplicación web académica para administrar clientes, contratos de empeño,
+inventario y ventas de una joyería. Está desarrollada con Django y utiliza
+plantillas renderizadas en el servidor.
 
-## Reglas de negocio acordadas
+## Tecnologías
 
-Respuestas del usuario recopiladas durante la Fase 2 e implementadas en los
-servicios de empeños.
+- Python 3.12 o superior
+- Django 5.2
+- SQLite para desarrollo
+- Pillow para el manejo de imágenes
+- Bootstrap 5.3
 
-### Intereses y préstamos
+## Funcionalidades
 
-- El rango de interés se selecciona según el monto prestado.
-- La tasa del rango es mensual y el interés es simple.
-- La tasa se conserva durante los primeros cuatro meses del contrato.
-- El interés se calcula sobre el capital pendiente por cada período mensual.
-- El plazo inicial es de cuatro meses calendario.
-- Al calcular un pago, renovación o retiro, se cuenta el tiempo transcurrido
-  hasta ese día. Para la fracción del mes: de 1 a 15 días cuenta medio mes; de
-  16 días hasta el fin del mes cuenta un mes completo. Los intereses se
-  redondean hacia arriba al peso.
-- Después del vencimiento, la tasa aumenta 0,5 puntos porcentuales por cada
-  mes de mora, incluidos períodos de medio mes según la regla anterior. La
-  tasa aumentada se aplica al tiempo total del ciclo. Ejemplo confirmado: con
-  tasa base de 5%, plazo inicial de cuatro meses y seis meses transcurridos
-  desde el inicio (dos meses después del vencimiento), la tasa es 6% y el
-  interés se calcula como capital × 6% × 6 meses.
-- El valor máximo prestable se calcula según el peso y el tipo de oro:
-  Italiano $300.000/g, Nacional $280.000/g, 14k $250.000/g y Chino
-  $200.000/g. Se suman los valores de todos los artículos y el total se
-  redondea una sola vez hacia abajo al millar. El préstamo mínimo es de
-  $50.000 y el cliente puede solicitar menos que el máximo calculado.
+- Gestión de clientes, empleados y administradores.
+- Creación y consulta de contratos de empeño con sus prendas.
+- Fechas de inicio y vencimiento automáticas: el plazo inicial es de cuatro
+  meses calendario.
+- Registro de abonos, renovaciones, retiros y liquidaciones.
+- Consulta de intereses, saldos y vencimientos.
+- Inventario de prendas disponibles y registro de ventas.
+- Catálogo público de prendas Italianas y Nacionales.
+- Simulador público de empeño que muestra el valor prestable y una proyección
+  de intereses sin crear un contrato.
+- Consulta de la cotización internacional del oro y actualización de las
+  tarifas de compra.
+- Portal para clientes, con acceso limitado a sus propios contratos. Los
+  clientes registrados por un empleado pueden crear sus credenciales desde la
+  pantalla de inicio de sesión.
 
-### Abonos, renovaciones y liquidación
+## Reglas principales
 
-- Un abono se aplica primero a los intereses acumulados y el excedente reduce
-  el capital.
-- Se permite renovar en cualquier momento, incluso durante el período de
-  gracia. El cliente paga el interés acumulado hasta la fecha de renovación.
-- Al renovar, el nuevo cálculo de intereses empieza desde la fecha de la
-  renovación para no volver a cobrar el interés ya pagado. La fecha de
-  vencimiento se extiende cuatro meses calendario desde el vencimiento
-  anterior.
-- El cliente puede pagar el saldo total y retirar sus prendas en cualquier
-  momento mientras el contrato siga ACTIVO, antes o después del vencimiento e
-  incluso durante la gracia. El retiro cierra el contrato; si el administrador
-  ya lo liquidó y pasó las prendas al inventario, el retiro ya no está
-  disponible.
-- Hay tres meses calendario de gracia después del vencimiento. Durante ese
-  tiempo el cliente todavía puede renovar o retirar la prenda. La liquidación
-  administrativa para pasarla a inventario se permite una vez cumplidos los
-  tres meses.
+### Empeños e intereses
 
-### Asuntos pendientes
+- El valor máximo prestable se calcula por gramo: Italiano $300.000, Nacional
+  $280.000, 14k $250.000 y Chino $200.000.
+- El valor calculado de las prendas se redondea una vez hacia abajo al millar.
+  El préstamo mínimo es de $50.000 y se puede solicitar un monto menor al
+  máximo calculado.
+- La tasa mensual se selecciona según el rango de monto configurado y se
+  aplica al capital pendiente.
+- Los intereses se calculan hasta la fecha de cada pago. Para fracciones de
+  mes, de 1 a 15 días se cuenta medio mes y de 16 días en adelante, un mes.
+- Durante la mora, la tasa aumenta 0,5 puntos porcentuales por cada mes de
+  retraso. Un abono cubre primero los intereses acumulados y luego reduce el
+  capital.
+- Para renovar, el cliente paga los intereses acumulados hasta la fecha. La
+  nueva fecha de vencimiento se calcula cuatro meses calendario después del
+  vencimiento anterior.
+- Después del vencimiento hay tres meses calendario de gracia. Durante ese
+  periodo se permite renovar o retirar las prendas.
+- Las tasas y los rangos de interés se configuran en la aplicación. Los datos
+  de demostración no representan condiciones comerciales vigentes.
 
-- No se proporcionaron criterios legales confirmados sobre topes de tasas,
-  regulación aplicable a compraventas ni protección de datos. Se debe consultar
-  al docente o al dueño del negocio antes de presentar el sistema como
-  conforme a dichas normas. Este proyecto no constituye validación legal.
-- Los montos y tasas específicos de cada rango de interés son datos
-  configurables; los valores ficticios del comando DEMO no son reglas reales.
+### Catálogo y ventas
 
-## Estado de construcción
+- Solo se publican y venden prendas de oro Italiano y Nacional.
+- La tarifa de venta es $350.000 por gramo para Italiano y $330.000 por gramo
+  para Nacional.
+- El precio sugerido se calcula a partir del peso y la tarifa de venta. Al
+  registrar una venta, el empleado puede establecer el precio final.
 
-- Fase 1: base Django, modelos iniciales, roles y datos DEMO.
-- Fase 2: reglas de negocio documentadas arriba.
-- Fase 3: servicios de cálculo y creación de contratos, clientes y flujo de
-  contratos con artículos, detalle e impresión.
-- Fase 4: abonos, renovaciones, retiros, anulación y paso de prendas al
-  inventario después de los tres meses calendario de gracia.
-- Fase 5: catálogo público con filtros, administración de prendas y ventas
-  transaccionales que descuentan el inventario.
-- Fase 6: Home integrado desde la maqueta, reportes básicos, páginas de error
-  y pulido visual.
-- Tarifas públicas: cotización XAU/COP, cálculo por pureza, margen de compra
-  del 95% y comando para actualizar los precios.
+### Compra de oro
+
+- La cotización XAU/COP de GoldAPI.io se combina con la pureza configurada para
+  cada tipo de oro.
+- La tarifa de compra publicada corresponde al 95% del valor referencial.
+- Estas tarifas son independientes de los valores usados para calcular
+  préstamos de empeño y precios de venta del catálogo.
 
 ## Instalación y ejecución
 
-Requisitos: Python 3.12 o superior, pip y acceso a Internet para Bootstrap por
-CDN.
+Desde PowerShell, en la carpeta del proyecto:
 
 ```powershell
-python -m venv venv
-venv\Scripts\activate
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py crear_roles
@@ -90,91 +84,48 @@ python manage.py cargar_datos_demo
 python manage.py runserver
 ```
 
-`cargar_datos_demo` solo funciona con `DEBUG` activo. Crea usuarios DEMO con
-la contraseña compartida `contraseña_demo1` y datos ficticios de clientes, contratos,
-inventario y ventas. Las cuentas de cliente pueden ingresar en `/cuentas/login/`
-y consultar sus propios contratos en `/mi-cuenta/`; no pueden entrar al panel
-del personal ni realizar pagos en línea.
+La aplicación estará disponible en <http://127.0.0.1:8000/>.
 
-El comando muestra la contraseña cuando crea una cuenta. Para restablecer y
-mostrar la contraseña de todas las cuentas DEMO, ejecuta:
+El comando `cargar_datos_demo` crea clientes, contratos, prendas y cuentas de
+prueba. Solo se puede ejecutar con `DEBUG` activado. Las cuentas DEMO comparten
+una contraseña de prueba que el comando informa al crearlas. Para restablecer
+las contraseñas y volver a mostrarlas:
 
 ```powershell
 python manage.py cargar_datos_demo --reset-demo-passwords
 ```
 
-Usa esa contraseña solo para las pruebas locales; no utilices estas cuentas ni
-sus datos ficticios en producción.
+Usa las cuentas y los datos DEMO únicamente en desarrollo.
 
-Establece `DJANGO_SECRET_KEY` para entornos que no sean de desarrollo y usa
-`DJANGO_DEBUG=False` en esos entornos.
+## Cotización del oro
 
-Para validar la instalación y las pruebas:
-
-```powershell
-python manage.py check
-python manage.py makemigrations --check --dry-run
-python manage.py test
-```
-
-El panel de reportes de Administrador permite consultar contratos vigentes y
-vencidos, y las ventas entre dos fechas. El catálogo público solo muestra
-prendas disponibles.
-
-## Catálogo de venta
-
-El catálogo y el registro de ventas solo ofrecen prendas Italianas y
-Nacionales. La tarifa es $350.000/g para Italiano y $330.000/g para Nacional;
-el precio total de cada prenda se calcula multiplicando la tarifa por su peso.
-En el catálogo se muestra la categoría como nombre de la prenda y, en la
-descripción, su peso y tipo de oro. Los valores de compra de oro y las tarifas
-para empeños son independientes de estos precios de venta.
-
-## Simulador público de empeño
-
-En `/empenos/simulador/`, cualquier visitante puede ingresar hasta cinco
-artículos (categoría, tipo de oro y peso) y el valor que necesita. El simulador
-calcula el valor prestable con las tarifas por tipo, muestra el máximo
-disponible redondeado hacia abajo al millar y permite ingresar un préstamo
-menor. También presenta las condiciones, el vencimiento y el interés/saldo
-estimado mes a mes, incluida la mora durante el periodo de gracia. No solicita
-datos personales ni crea ni guarda contratos.
-
-## Tarifas públicas de compra del oro
-
-La página de inicio muestra la tarifa estimada de compra por gramo para cada
-tipo de oro. La cotización XAU/COP de GoldAPI.io se multiplica por la pureza configurada
-para obtener el valor referencial. La tarifa pública de compra es el 95% de
-ese valor; no se aplica ajuste por categoría. La tarifa es referencial; la
-oferta final depende del peso y la pureza verificados en el local. Estas
-tarifas de mercado no se usan para calcular el valor prestable de un empeño.
-
-Purezas iniciales: Italiano 75%, Nacional 65%, 14k 58,3% y Chino 50%. Configura
-un token de GoldAPI.io en la variable de entorno `GOLDAPI_TOKEN` y ejecuta:
+Para consultar la API se necesita un token de GoldAPI.io. Configúralo en la
+variable de entorno `GOLDAPI_TOKEN` y ejecuta el comando de actualización:
 
 ```powershell
 $env:GOLDAPI_TOKEN = "tu-token"
 python manage.py actualizar_precios_oro
 ```
 
-El comando guarda el precio internacional y la hora informada por la API,
-actualiza las tarifas de compra de cada tipo y registra sus cambios en el historial.
-Para mantener la página actualizada, programa el comando periódicamente con el
-Programador de tareas de Windows según el intervalo y los límites de tu plan de
-API. Si la consulta falla, conserva los últimos valores y reporta el error; la
-página no presenta valores DEMO como tarifas vigentes.
+El comando guarda la cotización y actualiza las tarifas de compra. Para
+mantenerlas vigentes, vuelve a ejecutarlo periódicamente de acuerdo con los
+límites de consulta de tu plan de API. Si la consulta falla, se conservan los
+últimos valores disponibles.
 
-Estas tarifas de compra basadas en el mercado son independientes de las
-tarifas fijas usadas para calcular el máximo prestable en un empeño.
+## Configuración para otros entornos
 
-## Capturas
+En desarrollo, `DEBUG` está activado de forma predeterminada. Antes de ejecutar
+la aplicación en un entorno distinto, configura `DJANGO_SECRET_KEY`,
+`DJANGO_DEBUG=False` y `DJANGO_ALLOWED_HOSTS`. No publiques claves ni tokens.
 
-Inicio:
+La aplicación no incluye una base de datos con información local en el
+repositorio. Las migraciones crean la estructura y el comando DEMO carga datos
+ficticios.
 
-![Página de inicio del proyecto](./docs/capturas/inicio.png)
+## Pruebas y verificaciones
 
-Catálogo público (sin prendas disponibles en la base de datos de captura):
-
-![Catálogo público del proyecto](./docs/capturas/catalogo.png)
-
-
+```powershell
+python manage.py check
+python manage.py makemigrations --check --dry-run
+python manage.py test
+```
