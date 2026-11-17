@@ -1,0 +1,41 @@
+{% extends "base_panel.html" %}
+{% load moneda %}
+{% block titulo %}Pasar contrato a inventario{% endblock %}
+{% block panel_contenido %}
+<h1 class="h3 mb-3">Pasar a inventario · Contrato {{ contrato.numero_formateado }}</h1>
+<div class="alert alert-warning">
+  La fecha desde la que se permite liquidar es {{ fecha_liquidacion|date:"d/m/Y" }}, una vez cumplidos los tres meses calendario de gracia.
+  Indica el precio de venta inicial para cada prenda; el precio no se determina automáticamente.
+</div>
+<form method="post">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  {% if formset.non_form_errors %}
+    <div class="alert alert-danger">{{ formset.non_form_errors }}</div>
+  {% endif %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Prenda</th><th>Precio de venta inicial</th></tr></thead>
+      <tbody>
+      {% for form in formset %}
+        <tr>
+          <td>
+            {{ form.articulo_id }}
+            {{ form.categoria }}
+            {% for error in form.articulo_id.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+          </td>
+          <td>
+            {{ form.precio_venta }}
+            {% for error in form.precio_venta.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="2">Este contrato no tiene artículos.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <button class="btn btn-warning" type="submit">Liquidar y crear prendas</button>
+  <a class="btn btn-outline-secondary" href="{% url 'empenos:contrato_detalle' contrato.numero %}">Cancelar</a>
+</form>
+{% endblock %}

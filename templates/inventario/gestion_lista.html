@@ -1,0 +1,38 @@
+{% extends "base_panel.html" %}
+{% load moneda %}
+{% block titulo %}Gestión de prendas{% endblock %}
+{% block panel_contenido %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Gestión de prendas</h1>
+  <a class="btn btn-primary" href="{% url 'inventario:prenda_crear' %}">Nueva prenda</a>
+</div>
+<div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead><tr><th>Prenda</th><th>Peso</th><th>Precio</th><th>Estado</th><th>Origen</th><th>Acciones</th></tr></thead>
+    <tbody>
+      {% for prenda in prendas %}
+      <tr>
+        <td>{{ prenda.categoria }} ({{ prenda.tipo_oro }})</td>
+        <td>{{ prenda.peso_gramos }} g</td>
+        <td>{{ prenda.precio_venta|moneda }}</td>
+        <td>{{ prenda.get_estado_display }}</td>
+        <td>{{ prenda.get_origen_display }}</td>
+        <td class="text-nowrap">
+          <a href="{% url 'inventario:prenda_editar' prenda.pk %}">Editar</a>
+          <a class="text-danger ms-2" href="{% url 'inventario:prenda_eliminar' prenda.pk %}">Eliminar</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-center text-secondary">No hay prendas registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if is_paginated %}
+<nav aria-label="Paginación de prendas"><ul class="pagination">
+  {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>{% endif %}
+  <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+  {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base_panel.html" %}
+{% block titulo %}Registrar venta{% endblock %}
+{% block panel_contenido %}
+<h1 class="h3 mb-4">Registrar venta</h1>
+<form method="post" id="venta-form">
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+  {% endif %}
+  <div class="mb-4">
+    <label class="form-label" for="{{ form.cliente.id_for_label }}">{{ form.cliente.label }}</label>
+    {{ form.cliente }}
+    {% for error in form.cliente.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+  </div>
+  <section class="card mb-4">
+    <div class="card-header">Prendas vendidas</div>
+    <div class="card-body">
+      {{ formset.management_form }}
+      {% if formset.non_form_errors %}<div class="alert alert-danger">{{ formset.non_form_errors }}</div>{% endif %}
+      <div id="detalles-venta">
+        {% for detalle in formset %}
+          <div class="detalle-venta row g-3 align-items-end mb-3">
+            <div class="col-md-7">
+              <label class="form-label" for="{{ detalle.prenda.id_for_label }}">{{ detalle.prenda.label }}</label>
+              {{ detalle.prenda }}
+              {% for error in detalle.prenda.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label" for="{{ detalle.precio_final.id_for_label }}">{{ detalle.precio_final.label }}</label>
+              {{ detalle.precio_final }}
+              {% for error in detalle.precio_final.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="col-md-2"><button class="btn btn-outline-danger quitar-detalle" type="button">Quitar</button></div>
+          </div>
+        {% endfor %}
+      </div>
+      <button class="btn btn-outline-secondary" id="agregar-detalle" type="button">Agregar prenda</button>
+    </div>
+  </section>
+  <button class="btn btn-primary" type="submit">Guardar venta</button>
+  <a class="btn btn-outline-secondary" href="{% url 'ventas:lista' %}">Cancelar</a>
+</form>
+<template id="detalle-vacio">
+  <div class="detalle-venta row g-3 align-items-end mb-3">
+    <div class="col-md-7">
+      <label class="form-label" for="{{ formset.empty_form.prenda.id_for_label }}">{{ formset.empty_form.prenda.label }}</label>
+      {{ formset.empty_form.prenda }}
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="{{ formset.empty_form.precio_final.id_for_label }}">{{ formset.empty_form.precio_final.label }}</label>
+      {{ formset.empty_form.precio_final }}
+    </div>
+    <div class="col-md-2"><button class="btn btn-outline-danger quitar-detalle" type="button">Quitar</button></div>
+  </div>
+</template>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/venta_form.js" defer></script>
+{% endblock %}

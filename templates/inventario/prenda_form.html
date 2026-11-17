@@ -1,0 +1,23 @@
+{% extends "base_panel.html" %}
+{% block titulo %}{% if object %}Editar prenda{% else %}Nueva prenda{% endif %}{% endblock %}
+{% block panel_contenido %}
+<h1 class="h3 mb-4">{% if object %}Editar prenda{% else %}Nueva prenda{% endif %}</h1>
+<form method="post" enctype="multipart/form-data" class="row g-3">
+  {% csrf_token %}
+  {% for field in form %}
+    <div class="{% if field.name == 'descripcion' %}col-12{% else %}col-md-6{% endif %}">
+      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+      {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </div>
+  {% endfor %}
+  <div class="col-12 form-text">
+    El precio se calcula por peso: Italiano $350.000/g y Nacional $330.000/g.
+  </div>
+  <div class="col-12">
+    <button class="btn btn-primary" type="submit">Guardar</button>
+    <a class="btn btn-outline-secondary" href="{% url 'inventario:gestion_lista' %}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

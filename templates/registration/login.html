@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titulo %}Ingresar | Joyería y Compraventa{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-4">
+    <h1 class="h3 mb-4">Ingresar a la cuenta</h1>
+    {% if form.errors %}
+      <div class="alert alert-danger" role="alert">Usuario o contraseña incorrectos.</div>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.username.id_for_label }}">Usuario</label>
+        {{ form.username }}
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.password.id_for_label }}">Contraseña</label>
+        {{ form.password }}
+      </div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="btn btn-primary" type="submit">Ingresar</button>
+    </form>
+    <p class="mt-3 mb-0">
+      ¿Eres cliente y aún no tienes cuenta?
+      <a href="{% url 'core:registro_cliente' %}">Crea tus credenciales</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

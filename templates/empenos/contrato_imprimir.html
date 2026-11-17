@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load moneda %}
+{% block titulo %}Contrato {{ contrato.numero_formateado }}{% endblock %}
+{% block contenido %}
+<div class="d-print-none mb-3">
+  <button class="btn btn-primary" onclick="window.print()" type="button">Imprimir</button>
+  <a class="btn btn-outline-secondary" href="{% url 'empenos:contrato_detalle' contrato.numero %}">Volver</a>
+</div>
+<article class="contrato-papel">
+  <h1 class="text-center">Contrato de empeño {{ contrato.numero_formateado }}</h1>
+  <p><strong>Fecha:</strong> {{ contrato.fecha_inicio|date:"d/m/Y" }}</p>
+  <p><strong>Cliente:</strong> {{ contrato.cliente.nombres }} &nbsp; <strong>Documento:</strong> {{ contrato.cliente.documento }}</p>
+  <p><strong>Teléfono:</strong> {{ contrato.cliente.telefono }} &nbsp; <strong>Dirección:</strong> {{ contrato.cliente.direccion }}</p>
+  <table class="table table-bordered">
+    <thead><tr><th>Categoría</th><th>Tipo de oro</th><th>Peso</th><th>Tarifa/g aplicada</th><th>Valor calculado</th></tr></thead>
+    <tbody>
+    {% for articulo in contrato.articulos.all %}
+      <tr><td>{{ articulo.categoria }}</td><td>{{ articulo.tipo_oro }}</td><td>{{ articulo.peso_gramos }} g</td><td>{{ articulo.valor_gramo_aplicado|moneda }}</td><td>{{ articulo.valor_calculado|moneda }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p><strong>Valor calculado total:</strong> {{ contrato.valor_calculado_total|moneda }}</p>
+  <p><strong>Préstamo:</strong> {{ contrato.valor_prestamo|moneda }}</p>
+  <p><strong>Tasa mensual:</strong> {{ contrato.tasa_aplicada }}%</p>
+  <p><strong>Vencimiento:</strong> {{ contrato.fecha_vencimiento|date:"d/m/Y" }}</p>
+  <p><strong>Observaciones:</strong> {{ contrato.observaciones|default:"—" }}</p>
+  <div class="row mt-5 text-center">
+    <div class="col-6"><div class="firma"></div>Firma del cliente</div>
+    <div class="col-6"><div class="firma"></div>Firma del empleado</div>
+  </div>
+</article>
+{% endblock %}

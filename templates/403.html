@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block titulo %}Acceso denegado{% endblock %}
+{% block contenido %}
+<section class="text-center py-5">
+  <p class="display-1 fw-bold text-oro">403</p>
+  <h1 class="h3">No tienes permiso para acceder a esta página</h1>
+  <p class="text-secondary">Inicia sesión con una cuenta que tenga el rol requerido o vuelve al inicio.</p>
+  <a class="btn btn-primary" href="{% url 'core:home' %}">Ir al inicio</a>
+</section>
+{% endblock %}

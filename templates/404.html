@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block titulo %}Página no encontrada{% endblock %}
+{% block contenido %}
+<section class="text-center py-5">
+  <p class="display-1 fw-bold text-oro">404</p>
+  <h1 class="h3">No encontramos esta página</h1>
+  <p class="text-secondary">Puede que la dirección haya cambiado o no esté disponible.</p>
+  <a class="btn btn-primary" href="{% url 'core:home' %}">Ir al inicio</a>
+</section>
+{% endblock %}

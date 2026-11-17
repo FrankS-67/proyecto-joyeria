@@ -1,0 +1,64 @@
+{% extends "base_panel.html" %}
+{% load moneda %}
+{% block titulo %}Reportes{% endblock %}
+{% block panel_contenido %}
+<h1 class="h3 mb-4">Reportes</h1>
+<form method="post" class="row g-3 align-items-end mb-4">
+  {% csrf_token %}
+  {% for field in form %}
+    <div class="col-md-4">
+      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </div>
+  {% endfor %}
+  <div class="col-md-4">
+    <button class="btn btn-primary" type="submit">Consultar período</button>
+  </div>
+</form>
+{% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="card h-100"><div class="card-body"><h2 class="h6">Contratos vigentes</h2><p class="display-6 mb-0">{{ total_contratos_activos }}</p></div></div></div>
+  <div class="col-md-4"><div class="card h-100"><div class="card-body"><h2 class="h6">Contratos vencidos</h2><p class="display-6 mb-0">{{ total_contratos_vencidos }}</p></div></div></div>
+  <div class="col-md-4"><div class="card h-100"><div class="card-body"><h2 class="h6">Ventas del {{ desde|date:"d/m/Y" }} al {{ hasta|date:"d/m/Y" }}</h2><p class="h3 mb-0">{{ total_ventas|moneda }}</p><small>{{ cantidad_ventas }} ventas</small></div></div></div>
+</div>
+<section class="card mb-4">
+  <div class="card-header">Contratos vigentes</div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>Número</th><th>Cliente</th><th>Préstamo</th><th>Vencimiento</th></tr></thead>
+      <tbody>
+      {% for contrato in contratos_activos %}
+        <tr><td><a href="{% url 'empenos:contrato_detalle' contrato.numero %}">{{ contrato.numero_formateado }}</a></td><td>{{ contrato.cliente.nombres }}</td><td>{{ contrato.valor_prestamo|moneda }}</td><td>{{ contrato.fecha_vencimiento|date:"d/m/Y" }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="text-secondary">No hay contratos vigentes.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="card mb-4">
+  <div class="card-header">Contratos vencidos</div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>Número</th><th>Cliente</th><th>Préstamo</th><th>Vencimiento</th></tr></thead>
+      <tbody>
+      {% for contrato in contratos_vencidos %}
+        <tr><td><a href="{% url 'empenos:contrato_detalle' contrato.numero %}">{{ contrato.numero_formateado }}</a></td><td>{{ contrato.cliente.nombres }}</td><td>{{ contrato.valor_prestamo|moneda }}</td><td>{{ contrato.fecha_vencimiento|date:"d/m/Y" }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="text-secondary">No hay contratos vencidos.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="card">
+  <div class="card-header">Ventas del período</div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>Fecha</th><th>Cliente</th><th>Empleado</th><th>Total</th></tr></thead>
+      <tbody>
+      {% for venta in ventas_periodo %}
+        <tr><td>{{ venta.fecha|date:"d/m/Y H:i" }}</td><td>{{ venta.cliente|default:"Sin cliente" }}</td><td>{{ venta.empleado.get_username }}</td><td>{{ venta.total|moneda }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="text-secondary">No hay ventas en el período seleccionado.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

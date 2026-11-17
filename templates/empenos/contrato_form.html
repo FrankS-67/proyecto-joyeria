@@ -1,0 +1,102 @@
+{% extends "base_panel.html" %}
+{% block titulo %}Nuevo contrato{% endblock %}
+{% block panel_contenido %}
+<h1 class="h3 mb-4">Nuevo contrato de empeño</h1>
+<form method="post" id="contrato-form" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+  {% endif %}
+  <section class="card mb-4">
+    <div class="card-header">1. Cliente</div>
+    <div class="card-body row g-3">
+      {% for field in form %}
+        {% if field.name == "cliente" or field.name == "documento" or field.name == "nombres" or field.name == "telefono" or field.name == "direccion" %}
+        <div class="col-md-6">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+          {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </section>
+  <section class="card mb-4">
+    <div class="card-header">2. Artículos empeñados</div>
+    <div class="card-body">
+      {{ formset.management_form }}
+      {% if formset.non_form_errors %}<div class="alert alert-danger">{{ formset.non_form_errors }}</div>{% endif %}
+      <div id="articulos">
+        {% for articulo_form in formset %}
+          <div class="articulo-form border rounded p-3 mb-3">
+            {% for hidden in articulo_form.hidden_fields %}{{ hidden }}{% endfor %}
+            {% if articulo_form.non_field_errors %}<div class="alert alert-danger">{{ articulo_form.non_field_errors }}</div>{% endif %}
+            <div class="row g-3 align-items-end">
+              {% for field in articulo_form.visible_fields %}
+                {% if field.name != "DELETE" %}
+                <div class="col-md-3">
+                  <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                  {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                </div>
+                {% endif %}
+              {% endfor %}
+              <div class="col-md-2">
+                <button class="btn btn-outline-danger quitar-articulo" type="button">Quitar</button>
+                <span class="d-none">{{ articulo_form.DELETE }}</span>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <button class="btn btn-outline-secondary" id="agregar-articulo" type="button">Agregar artículo</button>
+      <div class="mt-3">Valor calculado total: <strong id="valor-calculado-total">$ 0</strong></div>
+      <div class="fs-5">Máximo prestable: <strong id="valor-maximo-prestable">$ 0</strong></div>
+    </div>
+  </section>
+  <section class="card mb-4">
+    <div class="card-header">3. Condiciones del préstamo</div>
+    <div class="card-body row g-3">
+      {% for field in form %}
+        {% if field.name == "fecha_inicio" or field.name == "fecha_vencimiento" or field.name == "valor_prestamo" or field.name == "observaciones" %}
+        <div class="{% if field.name == 'observaciones' %}col-12{% else %}col-md-4{% endif %}">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.name == "valor_prestamo" %}
+            <button class="btn btn-sm btn-outline-secondary mt-2" id="usar-maximo-prestable" type="button">Usar máximo prestable</button>
+          {% endif %}
+          {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+          {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </section>
+  <button class="btn btn-primary" type="submit">Crear contrato</button>
+  <a class="btn btn-outline-secondary" href="{% url 'empenos:contrato_list' %}">Cancelar</a>
+</form>
+{{ valores_oro_json|json_script:"valores-oro" }}
+<template id="articulo-vacio">
+  <div class="articulo-form border rounded p-3 mb-3">
+    {% for hidden in formset.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
+    <div class="row g-3 align-items-end">
+      {% for field in formset.empty_form.visible_fields %}
+        {% if field.name != "DELETE" %}
+        <div class="col-md-3">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+        </div>
+        {% endif %}
+      {% endfor %}
+      <div class="col-md-2">
+        <button class="btn btn-outline-danger quitar-articulo" type="button">Quitar</button>
+        <span class="d-none">{{ formset.empty_form.DELETE }}</span>
+      </div>
+    </div>
+  </div>
+</template>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/empeno_form.js" defer></script>
+{% endblock %}

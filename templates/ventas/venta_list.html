@@ -1,0 +1,41 @@
+{% extends "base_panel.html" %}
+{% load moneda %}
+{% block titulo %}Ventas{% endblock %}
+{% block panel_contenido %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Ventas</h1>
+  <a class="btn btn-primary" href="{% url 'ventas:nueva' %}">Registrar venta</a>
+</div>
+<div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead><tr><th>N.º</th><th>Fecha</th><th>Cliente</th><th>Prendas</th><th>Total</th><th>Empleado</th></tr></thead>
+    <tbody>
+      {% for venta in ventas %}
+      <tr>
+        <td>{{ venta.pk }}</td>
+        <td>{{ venta.fecha|date:"d/m/Y H:i" }}</td>
+        <td>{{ venta.cliente|default:"Venta sin cliente" }}</td>
+        <td>
+          <ul class="mb-0">
+            {% for detalle in venta.detalles.all %}
+              <li>{{ detalle.prenda.categoria }} — {{ detalle.precio_final|moneda }}</li>
+            {% endfor %}
+          </ul>
+        </td>
+        <td>{{ venta.total|moneda }}</td>
+        <td>{{ venta.empleado.get_username }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-center text-secondary">No hay ventas registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if is_paginated %}
+<nav aria-label="Paginación de ventas"><ul class="pagination">
+  {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>{% endif %}
+  <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+  {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

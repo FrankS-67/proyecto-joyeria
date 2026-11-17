@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static moneda %}
+{% block titulo %}Joyería y Compraventa | Inicio{% endblock %}
+{% block clase_contenido %}p-0{% endblock %}
+{% block contenido %}
+<section class="home-hero">
+  <div class="home-hero-text">
+    <h1>Oro con respaldo. Compra, vende o empeña con confianza.</h1>
+    <p>
+      En el catálogo encontrarás prendas de oro italiano y nacional.
+      Avalúo por gramo y contrato claro desde el primer día.
+    </p>
+    <a class="btn btn-oro" href="{% url 'inventario:catalogo' %}">Ver catálogo</a>
+    <a class="btn btn-outline-light ms-2" href="#empenos">¿Cómo funciona el empeño?</a>
+    <a class="btn btn-outline-light ms-2 mt-2" href="{% url 'empenos:simulador' %}">Simula tu empeño</a>
+  </div>
+</section>
+
+<section id="catalogo" class="home-seccion">
+  <h2>Categorías de prendas</h2>
+  <div class="home-grid home-grid-6">
+    {% for categoria in categorias %}
+      <a class="home-card" href="{% url 'inventario:catalogo' %}?categoria={{ categoria.pk }}">
+        <span class="home-icon">{{ categoria.nombre|slice:":2"|upper }}</span>
+        {{ categoria.nombre }}
+      </a>
+    {% empty %}
+      <p class="text-secondary">Las categorías estarán disponibles próximamente.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="precios-oro" class="home-seccion home-seccion-alt">
+  <div class="home-seccion-inner">
+    <h2>Tarifas de compra del oro</h2>
+    {% if cotizacion_oro %}
+      <p>
+        Referencia internacional 24k: {{ cotizacion_oro.precio_24k_gramo_cop|moneda }} COP/g.
+        Actualizada el {{ cotizacion_oro.fecha_cotizacion|date:"d/m/Y H:i" }} (hora de Colombia).
+      </p>
+      <p>La tarifa ofrecida equivale al 95% del valor según la pureza. Es referencial; la oferta final depende del peso y la pureza verificados en el local.</p>
+    {% else %}
+      <p>Las tarifas estarán disponibles cuando se consulte la primera cotización del mercado.</p>
+    {% endif %}
+    <div class="home-grid home-grid-4">
+      {% for tipo in tipos_oro %}
+        <article class="home-card home-tipo">
+          <h3>{{ tipo.nombre }}</h3>
+          <p>Pureza de referencia: {{ tipo.pureza }}%</p>
+          {% if cotizacion_oro %}
+            <p>{{ tipo.precio_compra_gramo|moneda }} COP/g</p>
+          {% endif %}
+        </article>
+      {% empty %}
+        <p class="text-secondary">Los tipos de oro estarán disponibles próximamente.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section id="empenos" class="home-seccion">
+  <h2>Empeña tu oro en 3 pasos</h2>
+  <ol class="home-pasos">
+    <li><strong>Avalúo</strong><span>Pesamos y clasificamos tu prenda.</span></li>
+    <li><strong>Contrato</strong><span>Recibes un contrato con número único y condiciones registradas.</span></li>
+    <li><strong>Recibes tu dinero</strong><span>Recibes el préstamo acordado y puedes retirar tus prendas pagando el saldo.</span></li>
+  </ol>
+</section>
+
+<footer id="contacto" class="home-pie">
+  <p>Para información de contacto, consulta directamente en el local.</p>
+  <p>&copy; {% now "Y" %} Joyería y Compraventa. Proyecto académico, Programación en la Web (UIS).</p>
+</footer>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load moneda %}
+{% block titulo %}{{ prenda.categoria }} | Catálogo{% endblock %}
+{% block contenido %}
+<a href="{% url 'inventario:catalogo' %}">&larr; Volver al catálogo</a>
+<div class="row g-4 mt-2">
+  {% if prenda.foto %}
+  <div class="col-md-6"><img class="img-fluid rounded" src="{{ prenda.foto.url }}" alt="{{ prenda.categoria }}"></div>
+  {% endif %}
+  <div class="{% if prenda.foto %}col-md-6{% else %}col-md-8{% endif %}">
+    <h1>{{ prenda.categoria }}</h1>
+    <p><strong>Descripción:</strong> {{ prenda.descripcion_catalogo }}</p>
+    <p><strong>Tarifa:</strong> {{ prenda.tarifa_venta_por_gramo|moneda }} COP/g</p>
+    <p><strong>Precio total:</strong> {{ prenda.precio_venta|moneda }}</p>
+    <p class="text-secondary">Disponible en el local. Este catálogo es informativo; la compra se realiza presencialmente.</p>
+  </div>
+</div>
+{% endblock %}

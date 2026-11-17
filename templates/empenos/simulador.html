@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% load moneda %}
+{% block titulo %}Simulador de empeño | Joyería y Compraventa{% endblock %}
+{% block contenido %}
+<div class="mx-auto" style="max-width: 1100px;">
+  <h1 class="h2 mb-2">Simula tu empeño</h1>
+  <p class="text-secondary mb-4">
+    Calcula el valor prestable según el tipo de oro y el peso, además del interés y saldo estimados.
+    No necesitas identificarte y esta simulación no crea un contrato.
+  </p>
+
+  <form method="post" id="contrato-form" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+    <section class="card mb-4">
+      <div class="card-header">1. Artículos que quieres empeñar</div>
+      <div class="card-body">
+        {{ formset.management_form }}
+        {% if formset.non_form_errors %}
+          <div class="alert alert-danger">{{ formset.non_form_errors }}</div>
+        {% endif %}
+        <div id="articulos">
+          {% for articulo_form in formset %}
+            <div class="articulo-form border rounded p-3 mb-3">
+              {% for hidden in articulo_form.hidden_fields %}{{ hidden }}{% endfor %}
+              {% if articulo_form.non_field_errors %}
+                <div class="alert alert-danger">{{ articulo_form.non_field_errors }}</div>
+              {% endif %}
+              <div class="row g-3 align-items-end">
+                {% for field in articulo_form.visible_fields %}
+                  {% if field.name != "DELETE" %}
+                    <div class="col-md-4">
+                      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                      {{ field }}
+                      {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+                <div class="col-md-2">
+                  <button class="btn btn-outline-danger quitar-articulo" type="button">Quitar</button>
+                  <span class="d-none">{{ articulo_form.DELETE }}</span>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <button class="btn btn-outline-secondary" id="agregar-articulo" type="button">Agregar artículo</button>
+        <div class="mt-3">Valor calculado total: <strong id="valor-calculado-total">$ 0</strong></div>
+        <div class="fs-5">Máximo prestable: <strong id="valor-maximo-prestable">$ 0</strong></div>
+      </div>
+    </section>
+
+    <section class="card mb-4">
+      <div class="card-header">2. Monto que necesitas</div>
+      <div class="card-body">
+        <label class="form-label" for="{{ form.valor_prestamo.id_for_label }}">{{ form.valor_prestamo.label }}</label>
+        {{ form.valor_prestamo }}
+        {% for error in form.valor_prestamo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        <div class="form-text">{{ form.valor_prestamo.help_text }} El préstamo mínimo es de $ 50.000.</div>
+        <button class="btn btn-sm btn-outline-secondary mt-2" id="usar-maximo-prestable" type="button">Usar máximo prestable</button>
+      </div>
+    </section>
+
+    <button class="btn btn-primary" type="submit">Calcular simulación</button>
+  </form>
+
+  {% if simulacion %}
+    <section class="mt-5" aria-live="polite">
+      <div class="alert alert-warning">
+        <strong>Simulación informativa:</strong> no es un contrato, aprobación ni oferta definitiva.
+        El valor calculado final se confirma al revisar físicamente las prendas.
+      </div>
+      <h2 class="h3">Resumen del empeño simulado</h2>
+      <div class="card mb-4">
+        <div class="card-header">Condiciones estimadas</div>
+        <div class="card-body row g-3">
+          <div class="col-md-4"><strong>Fecha de inicio:</strong> {{ simulacion.fecha_inicio|date:"d/m/Y" }}</div>
+          <div class="col-md-4"><strong>Vencimiento:</strong> {{ simulacion.fecha_vencimiento|date:"d/m/Y" }}</div>
+          <div class="col-md-4"><strong>Liquidación posible desde:</strong> {{ simulacion.fecha_liquidacion|date:"d/m/Y" }}</div>
+          <div class="col-md-4"><strong>Préstamo solicitado:</strong> {{ simulacion.valor_prestamo|moneda }}</div>
+          <div class="col-md-4"><strong>Valor calculado total:</strong> {{ simulacion.valor_calculado_total|moneda }}</div>
+          <div class="col-md-4"><strong>Máximo prestable:</strong> {{ simulacion.valor_maximo_prestable|moneda }}</div>
+          <div class="col-md-4"><strong>Tasa mensual inicial:</strong> {{ simulacion.tasa_mensual }}%</div>
+          <div class="col-md-8"><strong>Identificador:</strong> No aplica; no se ha creado un contrato oficial.</div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">Artículos declarados</div>
+        <div class="table-responsive">
+          <table class="table mb-0">
+            <thead>
+              <tr><th>Prenda</th><th>Tipo de oro</th><th>Peso</th><th>Tarifa de préstamo/g</th><th>Valor calculado</th></tr>
+            </thead>
+            <tbody>
+              {% for articulo in simulacion.articulos %}
+                <tr>
+                  <td>{{ articulo.categoria }}</td>
+                  <td>{{ articulo.tipo_oro }}</td>
+                  <td>{{ articulo.peso_gramos }} g</td>
+                  <td>{{ articulo.valor_gramo|moneda }}</td>
+                  <td>{{ articulo.valor_calculado|moneda }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot><tr><th colspan="4">Valor calculado total</th><th>{{ simulacion.valor_calculado_total|moneda }}</th></tr></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Intereses y saldo estimado</div>
+        <div class="table-responsive">
+          <table class="table mb-0">
+            <thead>
+              <tr><th>Periodo</th><th>Fecha</th><th>Tasa mensual aplicada</th><th>Interés acumulado</th><th>Saldo estimado</th></tr>
+            </thead>
+            <tbody>
+              {% for periodo in simulacion.proyecciones %}
+                <tr>
+                  <td>{{ periodo.periodo }}</td>
+                  <td>{{ periodo.fecha|date:"d/m/Y" }}</td>
+                  <td>{{ periodo.tasa }}%</td>
+                  <td>{{ periodo.interes|moneda }}</td>
+                  <td>{{ periodo.saldo|moneda }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="card-body">
+          <p class="mb-1">La proyección supone que no se hacen abonos ni renovaciones. Los intereses son simples sobre el capital pendiente. La fracción de mes se cuenta según las reglas vigentes; después del vencimiento la tasa sube 0,5 puntos por cada mes de mora y se aplica al tiempo total del ciclo.</p>
+          <p class="text-secondary mb-0">Las tasas de interés y el plazo se basan en la configuración actual del negocio. Confirma las condiciones definitivas en el local.</p>
+        </div>
+      </div>
+    </section>
+  {% endif %}
+</div>
+
+{{ valores_oro_json|json_script:"valores-oro" }}
+<template id="articulo-vacio">
+  <div class="articulo-form border rounded p-3 mb-3">
+    {% for hidden in formset.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
+    <div class="row g-3 align-items-end">
+      {% for field in formset.empty_form.visible_fields %}
+        {% if field.name != "DELETE" %}
+          <div class="col-md-4">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+          </div>
+        {% endif %}
+      {% endfor %}
+      <div class="col-md-2">
+        <button class="btn btn-outline-danger quitar-articulo" type="button">Quitar</button>
+        <span class="d-none">{{ formset.empty_form.DELETE }}</span>
+      </div>
+    </div>
+  </div>
+</template>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/empeno_form.js" defer></script>
+{% endblock %}

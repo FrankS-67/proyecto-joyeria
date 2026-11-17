@@ -1,0 +1,23 @@
+{% extends "base_panel.html" %}
+{% block titulo %}Anular contrato{% endblock %}
+{% block panel_contenido %}
+<h1 class="h3 mb-3">Anular contrato {{ contrato.numero_formateado }}</h1>
+<div class="alert alert-warning">
+  El contrato no se elimina. Se conservará con estado Anulado y se registrará el motivo.
+</div>
+<form method="post" class="row g-3">
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+    <div class="col-12"><div class="alert alert-danger">{{ form.non_field_errors }}</div></div>
+  {% endif %}
+  <div class="col-12">
+    <label class="form-label" for="{{ form.observacion.id_for_label }}">{{ form.observacion.label }}</label>
+    {{ form.observacion }}
+    {% for error in form.observacion.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+  </div>
+  <div class="col-12">
+    <button class="btn btn-danger" type="submit">Confirmar anulación</button>
+    <a class="btn btn-outline-secondary" href="{% url 'empenos:contrato_detalle' contrato.numero %}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

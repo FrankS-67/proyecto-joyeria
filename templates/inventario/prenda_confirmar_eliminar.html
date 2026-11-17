@@ -1,0 +1,11 @@
+{% extends "base_panel.html" %}
+{% block titulo %}Eliminar prenda{% endblock %}
+{% block panel_contenido %}
+<h1 class="h3">Eliminar prenda</h1>
+<p>¿Confirmas que deseas eliminar {{ object.categoria }} de {{ object.tipo_oro }}, {{ object.peso_gramos }} g?</p>
+<form method="post">
+  {% csrf_token %}
+  <button class="btn btn-danger" type="submit">Eliminar</button>
+  <a class="btn btn-outline-secondary" href="{% url 'inventario:gestion_lista' %}">Cancelar</a>
+</form>
+{% endblock %}

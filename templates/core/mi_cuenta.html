@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load moneda %}
+{% block titulo %}Mi cuenta | Joyería y Compraventa{% endblock %}
+{% block contenido %}
+<h1 class="h2 mb-4">Mi cuenta</h1>
+
+<section class="card mb-4">
+  <div class="card-header">Mis datos</div>
+  <div class="card-body row g-3">
+    <div class="col-md-6"><strong>Nombre:</strong> {{ cliente.nombres }}</div>
+    <div class="col-md-6"><strong>Documento:</strong> {{ cliente.documento }}</div>
+    <div class="col-md-6"><strong>Teléfono:</strong> {{ cliente.telefono }}</div>
+    <div class="col-md-6"><strong>Dirección:</strong> {{ cliente.direccion|default:"No registrada" }}</div>
+  </div>
+</section>
+
+<h2 class="h4 mb-3">Mis contratos</h2>
+{% for contrato in contratos %}
+  <section class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <strong>Contrato {{ contrato.numero_formateado }}</strong>
+      {% if contrato.estado == "ACTIVO" and contrato.esta_vencido %}
+        <span class="badge text-bg-danger">Vencido</span>
+      {% else %}
+        <span class="badge text-bg-secondary">{{ contrato.get_estado_display }}</span>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      <div class="row g-3 mb-3">
+        <div class="col-md-4"><strong>Préstamo:</strong> {{ contrato.valor_prestamo|moneda }}</div>
+        <div class="col-md-4"><strong>Interés a la fecha:</strong> {{ contrato.interes_actual|moneda }}</div>
+        <div class="col-md-4"><strong>Saldo a la fecha:</strong> {{ contrato.saldo_actual|moneda }}</div>
+        <div class="col-md-6"><strong>Inicio:</strong> {{ contrato.fecha_inicio|date:"d/m/Y" }}</div>
+        <div class="col-md-6"><strong>Vencimiento:</strong> {{ contrato.fecha_vencimiento|date:"d/m/Y" }}</div>
+        <div class="col-md-6"><strong>Tasa mensual:</strong> {{ contrato.tasa_aplicada }}%</div>
+        <div class="col-md-6"><strong>Valor calculado:</strong> {{ contrato.valor_calculado_total|moneda }}</div>
+      </div>
+      <h3 class="h6">Prendas</h3>
+      <ul class="mb-0">
+        {% for articulo in contrato.articulos.all %}
+          <li>{{ articulo.categoria }} de {{ articulo.tipo_oro }}, {{ articulo.peso_gramos }} g</li>
+        {% empty %}
+          <li class="text-secondary">No hay prendas asociadas.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+{% empty %}
+  <div class="alert alert-info">Todavía no tienes contratos registrados.</div>
+{% endfor %}
+<p class="text-secondary">Para pagos, renovaciones o retiros, comunícate con el personal de la joyería.</p>
+{% endblock %}

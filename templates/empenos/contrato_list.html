@@ -1,0 +1,71 @@
+{% extends "base_panel.html" %}
+{% load moneda %}
+{% block titulo %}Contratos{% endblock %}
+{% block panel_contenido %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Contratos de empeño</h1>
+  <a class="btn btn-primary" href="{% url 'empenos:contrato_crear' %}">Nuevo contrato</a>
+</div>
+<form method="get" class="row g-2 align-items-end mb-4">
+  <div class="col-md-5">
+    <label class="form-label" for="filtro-q">Número o documento</label>
+    <input class="form-control" id="filtro-q" name="q" value="{{ busqueda }}">
+  </div>
+  <div class="col-md-3">
+    <label class="form-label" for="filtro-estado">Estado</label>
+    <select class="form-select" id="filtro-estado" name="estado">
+      <option value="">Todos</option>
+      <option value="ACTIVO" {% if estado == "ACTIVO" %}selected{% endif %}>Activo</option>
+      <option value="VENCIDO" {% if estado == "VENCIDO" %}selected{% endif %}>Vencido</option>
+      <option value="RETIRADO" {% if estado == "RETIRADO" %}selected{% endif %}>Retirado</option>
+      <option value="LIQUIDADO" {% if estado == "LIQUIDADO" %}selected{% endif %}>Liquidado</option>
+      <option value="ANULADO" {% if estado == "ANULADO" %}selected{% endif %}>Anulado</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label" for="filtro-desde">Desde fecha</label>
+    <input class="form-control" id="filtro-desde" type="date" name="desde" value="{{ desde }}">
+  </div>
+  <div class="col-md-2">
+    <button class="btn btn-outline-secondary w-100" type="submit">Filtrar</button>
+  </div>
+</form>
+<div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead><tr><th>Número</th><th>Cliente</th><th>Inicio</th><th>Vencimiento</th><th>Préstamo</th><th>Estado</th></tr></thead>
+    <tbody>
+      {% for contrato in contratos %}
+        <tr>
+          <td><a href="{% url 'empenos:contrato_detalle' contrato.numero %}">{{ contrato.numero_formateado }}</a></td>
+          <td>{{ contrato.cliente.nombres }}</td>
+          <td>{{ contrato.fecha_inicio|date:"d/m/Y" }}</td>
+          <td>{{ contrato.fecha_vencimiento|date:"d/m/Y" }}</td>
+          <td>{{ contrato.valor_prestamo|moneda }}</td>
+          <td>
+            {% if contrato.esta_vencido %}
+              <span class="badge text-bg-danger">Vencido</span>
+            {% else %}
+              <span class="badge text-bg-secondary">{{ contrato.get_estado_display }}</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="text-center text-secondary">No hay contratos para mostrar.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if is_paginated %}
+<nav aria-label="Paginación de contratos">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?q={{ busqueda|urlencode }}&estado={{ estado|urlencode }}&desde={{ desde|urlencode }}&page={{ page_obj.previous_page_number }}">Anterior</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?q={{ busqueda|urlencode }}&estado={{ estado|urlencode }}&desde={{ desde|urlencode }}&page={{ page_obj.next_page_number }}">Siguiente</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

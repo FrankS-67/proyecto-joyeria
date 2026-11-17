@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titulo %}Crear cuenta de cliente | Joyería y Compraventa{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-5">
+    <h1 class="h3 mb-3">Crear cuenta de cliente</h1>
+    <p class="text-secondary">
+      Este registro es para clientes que ya fueron registrados por un empleado.
+      Ingresa el mismo documento y teléfono que entregaste en la tienda.
+    </p>
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>
+      {% endif %}
+      {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+      <button class="btn btn-primary" type="submit">Crear cuenta</button>
+      <a class="btn btn-outline-secondary" href="{% url 'login' %}">Volver al inicio de sesión</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

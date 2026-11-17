@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load roles %}
+{% block contenido %}
+<div class="row g-4">
+  <aside class="col-md-3 col-lg-2">
+    <nav class="nav flex-column panel-nav">
+      <a class="nav-link" href="{% url 'empenos:contrato_list' %}">Contratos</a>
+      {% if user.is_superuser or user|en_grupo:"Empleado" or user|en_grupo:"Administrador" %}
+        <a class="nav-link" href="{% url 'empenos:cliente_list' %}">Clientes</a>
+        <a class="nav-link" href="{% url 'inventario:catalogo' %}">Catálogo</a>
+        <a class="nav-link" href="{% url 'ventas:lista' %}">Ventas</a>
+      {% endif %}
+      {% if user.is_superuser or user|en_grupo:"Administrador" %}
+        <a class="nav-link" href="{% url 'inventario:gestion_lista' %}">Gestionar prendas</a>
+        <span class="nav-link text-secondary">Tipos de oro</span>
+        <span class="nav-link text-secondary">Rangos de interés</span>
+        <a class="nav-link" href="{% url 'core:reportes' %}">Reportes</a>
+      {% endif %}
+    </nav>
+  </aside>
+  <section class="col-md-9 col-lg-10">
+    {% block panel_contenido %}{% endblock %}
+  </section>
+</div>
+{% endblock %}

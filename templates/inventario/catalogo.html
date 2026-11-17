@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load moneda %}
+{% block titulo %}Catálogo | Joyería y Compraventa{% endblock %}
+{% block contenido %}
+<h1 class="mb-4">Catálogo de prendas</h1>
+<form method="get" class="row g-3 align-items-end mb-4">
+  <div class="col-md-4">
+    <label class="form-label" for="filtro-categoria">Categoría</label>
+    <select class="form-select" name="categoria" id="filtro-categoria">
+      <option value="">Todas</option>
+      {% for categoria in categorias %}
+        <option value="{{ categoria.pk }}" {% if categoria_seleccionada == categoria.pk|stringformat:"s" %}selected{% endif %}>{{ categoria.nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-4">
+    <label class="form-label" for="filtro-oro">Tipo de oro</label>
+    <select class="form-select" name="tipo_oro" id="filtro-oro">
+      <option value="">Todos</option>
+      {% for tipo in tipos_oro %}
+        <option value="{{ tipo.pk }}" {% if tipo_oro_seleccionado == tipo.pk|stringformat:"s" %}selected{% endif %}>{{ tipo.nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2"><button class="btn btn-primary w-100" type="submit">Filtrar</button></div>
+  <div class="col-md-2"><a class="btn btn-outline-secondary w-100" href="{% url 'inventario:catalogo' %}">Limpiar</a></div>
+</form>
+<div class="row g-4">
+  {% for prenda in prendas %}
+    <div class="col-sm-6 col-lg-4">
+      <article class="card h-100">
+        {% if prenda.foto %}
+          <img src="{{ prenda.foto.url }}" class="card-img-top catalogo-foto" alt="{{ prenda.categoria }}">
+        {% endif %}
+        <div class="card-body d-flex flex-column">
+          <h2 class="h5">{{ prenda.categoria }}</h2>
+          <p class="text-secondary">{{ prenda.descripcion_catalogo }}</p>
+          <p>{{ prenda.tarifa_venta_por_gramo|moneda }} COP/g</p>
+          <p class="fw-bold">Precio total: {{ prenda.precio_venta|moneda }}</p>
+          <a class="btn btn-outline-primary mt-auto" href="{% url 'inventario:prenda_detalle' prenda.pk %}">Ver detalle</a>
+        </div>
+      </article>
+    </div>
+  {% empty %}
+    <div class="col-12"><p class="text-secondary">No hay prendas disponibles con esos filtros.</p></div>
+  {% endfor %}
+</div>
+{% if is_paginated %}
+<nav class="mt-4" aria-label="Paginación del catálogo">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?categoria={{ categoria_seleccionada }}&tipo_oro={{ tipo_oro_seleccionado }}&page={{ page_obj.previous_page_number }}">Anterior</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?categoria={{ categoria_seleccionada }}&tipo_oro={{ tipo_oro_seleccionado }}&page={{ page_obj.next_page_number }}">Siguiente</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

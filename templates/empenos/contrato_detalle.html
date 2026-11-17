@@ -1,0 +1,88 @@
+{% extends "base_panel.html" %}
+{% load moneda roles %}
+{% block titulo %}Contrato {{ contrato.numero_formateado }}{% endblock %}
+{% block panel_contenido %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <div>
+    <h1 class="h3">Contrato {{ contrato.numero_formateado }}</h1>
+    <p class="text-secondary mb-0">
+      {% if contrato.esta_vencido %}<span class="badge text-bg-danger">Vencido</span>
+      {% else %}<span class="badge text-bg-secondary">{{ contrato.get_estado_display }}</span>{% endif %}
+    </p>
+  </div>
+  <div class="d-flex gap-2">
+    {% if contrato.estado == "ACTIVO" %}
+      <a class="btn btn-primary" href="{% url 'empenos:contrato_pago' contrato.numero %}">Registrar pago</a>
+    {% endif %}
+    {% if user.is_superuser or user|en_grupo:"Administrador" %}
+      {% if contrato.estado != "ANULADO" %}
+        <a class="btn btn-outline-danger" href="{% url 'empenos:contrato_anular' contrato.numero %}">Anular</a>
+      {% endif %}
+      {% if puede_liquidarse %}
+        <a class="btn btn-outline-warning" href="{% url 'empenos:contrato_liquidar' contrato.numero %}">Pasar a inventario</a>
+      {% endif %}
+    {% endif %}
+    <a class="btn btn-outline-secondary" href="{% url 'empenos:contrato_imprimir' contrato.numero %}">Imprimir</a>
+  </div>
+</div>
+<div class="card mb-4">
+  <div class="card-header">Cliente y condiciones</div>
+  <div class="card-body row">
+    <div class="col-md-6">
+      <p><strong>Cliente:</strong> {{ contrato.cliente.nombres }}</p>
+      <p><strong>Documento:</strong> {{ contrato.cliente.documento }}</p>
+      <p><strong>Teléfono:</strong> {{ contrato.cliente.telefono }}</p>
+    </div>
+    <div class="col-md-6">
+      <p><strong>Inicio:</strong> {{ contrato.fecha_inicio|date:"d/m/Y" }}</p>
+      <p><strong>Vencimiento:</strong> {{ contrato.fecha_vencimiento|date:"d/m/Y" }}</p>
+      <p><strong>Préstamo:</strong> {{ contrato.valor_prestamo|moneda }}</p>
+      <p><strong>Tasa aplicada:</strong> {{ contrato.tasa_aplicada }}% mensual</p>
+    </div>
+    {% if contrato.observaciones %}<div class="col-12"><strong>Observaciones:</strong> {{ contrato.observaciones }}</div>{% endif %}
+  </div>
+</div>
+<div class="card mb-4">
+  <div class="card-header">Artículos empeñados</div>
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead><tr><th>Categoría</th><th>Tipo de oro</th><th>Peso</th><th>Tarifa/g aplicada</th><th>Valor calculado</th></tr></thead>
+      <tbody>
+        {% for articulo in contrato.articulos.all %}
+        <tr>
+          <td>{{ articulo.categoria }}</td><td>{{ articulo.tipo_oro }}</td>
+          <td>{{ articulo.peso_gramos }} g</td>
+          <td>{{ articulo.valor_gramo_aplicado|moneda }}</td>
+          <td>{{ articulo.valor_calculado|moneda }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="4">Valor calculado total</th><th>{{ contrato.valor_calculado_total|moneda }}</th></tr></tfoot>
+    </table>
+  </div>
+</div>
+<div class="card mb-4">
+  <div class="card-header">Saldo a la fecha</div>
+  <div class="card-body row">
+    <div class="col-md-6"><strong>Interés acumulado:</strong> {{ interes|moneda }}</div>
+    <div class="col-md-6"><strong>Saldo total:</strong> {{ saldo|moneda }}</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header">Pagos</div>
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead><tr><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Empleado</th><th>Observaciones</th></tr></thead>
+      <tbody>
+        {% for pago in contrato.pagos.all %}
+        <tr>
+          <td>{{ pago.fecha|date:"d/m/Y H:i" }}</td><td>{{ pago.get_tipo_display }}</td>
+          <td>{{ pago.monto|moneda }}</td><td>{{ pago.empleado.get_username }}</td>
+          <td>{{ pago.observaciones }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="5" class="text-secondary">Aún no hay pagos registrados.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
